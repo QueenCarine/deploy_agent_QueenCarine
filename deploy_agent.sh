@@ -140,6 +140,13 @@ project_deployment() {
             *)   echo "Invalid choice: '$r_choice'. Please choose between A or B." >&2 ;;
         esac
     done
+        chmod +x "$dir/attendance_checker.py" \
+        || { echo "Error:'attendance_checker.py' could not be executable." >&2; return 1; }
+
+    chmod 600 "$dir/Helpers/config.json" \
+        || { echo "Error: Not able to restrict permissions on 'config.json'." >&2; return 1; }
+
+    echo "Permissions set: attendance_checker.py (executable), Helpers/config.json (600)."
 
     echo "Deployment complete: $dir is ready."
 }
