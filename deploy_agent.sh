@@ -79,6 +79,10 @@ project_deployment() {
     cp templates/config.json "$dir/Helpers/" || { echo "Error: could not copy 'config.json' into '$dir/Helpers/'." >&2; return 1; }
 
     # Roster
+     local names=(
+        "Alice Johnson" "Bob Smith" "Charlie Davis" "Diana Prince" "Ethan Cole"
+        "Fatima Noor" "George Mensah" "Hannah Kim" "Ibrahim Osei" "Jasmine Lee"
+    )
     while true; do
         echo
         echo "How would you like to set up your roster?"
@@ -107,7 +111,30 @@ project_deployment() {
                 echo "Copied $n student(s) from the template into '$dir/Helpers/assets.csv'."
                 break
                 ;;
-            B|b) echo "Selected generate new roster."; break ;;
+                        B|b)
+                read -rp "How many students do you want to generate? " n
+
+                if [[ ! "$n" =~ ^[0-9]+$ ]] || (( n < 1 )); then
+                    echo "Error: Please enter a number equal to or greater than 1." >&2
+                    continue
+                fi
+
+                if (( n > ${#names[@]} )); then
+                    echo "Error: You can only generate up to ${#names[@]} students. Please enter 1-${#names[@]}." >&2
+                    continue
+                fi
+
+                {
+                    echo "Email,Names,Attendance Count,Absence Count"
+                    for (( i=0; i<n; i++ )); do
+                        echo "student$(( i + 1 ))@example.com,${names[$i]},0,0"
+                    done
+                } > "$dir/Helpers/assets.csv" \
+                    || { echo "Error: could not write roster to '$dir/Helpers/assets.csv'." >&2; return 1; }
+
+                echo "Generated $n student(s) into '$dir/Helpers/assets.csv'."
+                break
+                ;;
             *)   echo "Invalid choice: '$r_choice'. Please choose between A or B." >&2 ;;
         esac
     done
