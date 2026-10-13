@@ -133,6 +133,8 @@ project_deployment() {
                     || { echo "Error: could not write roster to '$dir/Helpers/assets.csv'." >&2; return 1; }
 
                 echo "Generated $n student(s) into '$dir/Helpers/assets.csv'."
+                sed -i 's/"total_sessions": [0-9]\+/"total_sessions": 1/' "$dir/Helpers/config.json" \
+                    || { echo "Error: could not update total_sessions in config.json." >&2; return 1; }
                 break
                 ;;
             *)   echo "Invalid choice: '$r_choice'. Please choose between A or B." >&2 ;;
