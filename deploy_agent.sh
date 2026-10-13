@@ -36,7 +36,7 @@ start_menu() {
         read -rp "Choose one option from 1 to 4: " choice
 
         case "$choice" in
-            1) echo "You selected Deploy." ;;
+            1) project_deployment ;;
             2) echo "You selected Run." ;;
             3) echo "You selected Archive." ;;
             4) echo "Exiting."; exit 0 ;;
@@ -45,5 +45,37 @@ start_menu() {
     done
 }
 
+# Project Deployment
+project_deployment() {
+    read -rp "Enter your project name: " name
+
+    if [[ -z "$name" ]]; then
+        echo "Error: project has to have a name." >&2
+        return 1
+    fi
+
+    if [[ ! "$name" =~ ^[A-Za-z0-9_-]+$ ]]; then
+        echo "Error: project name can only contain letters, numbers, '_' and '-'." >&2
+        echo "       Received: '$name'" >&2
+        return 1
+    fi
+
+
+    local dir="attendance_tracker_${name}"
+
+    if [[ -d "$dir" ]]; then
+        read -rp "Directory '$dir' already exists. Overwrite? (y/n): " confirm
+        if [[ "$confirm" == "y" || "$confirm" == "Y" ]]; then
+            rm -rf -- "$dir"
+        else
+            echo "Aborted: '$dir' has not been overwritten. Returning to the start menu." >&2
+            return 1
+        fi
+    fi
+
+    echo "Deploying to: $dir"
+}
+
 verify_dependencies
 start_menu
+
