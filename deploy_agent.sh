@@ -78,9 +78,42 @@ project_deployment() {
     cp templates/attendance_checker.py "$dir/" || { echo "Error: could not copy 'attendance_checker.py' into '$dir/'." >&2; return 1; }
     cp templates/config.json "$dir/Helpers/" || { echo "Error: could not copy 'config.json' into '$dir/Helpers/'." >&2; return 1; }
 
+    # Roster
+    while true; do
+        echo
+        echo "How would you like to set up your roster?"
+        echo "  A) Copy from the template"
+        echo "  B) Generate a fresh roster"
+
+        read -rp "Choose an option [A/B]: " r_choice
+
+        case "$r_choice" in
+                        A|a)
+                read -rp "How many students to copy? " n
+
+                if [[ ! "$n" =~ ^[0-9]+$ ]] || (( n < 1 )); then
+                    echo "Error: Please enter a number equal to or greater than 1." >&2
+                    continue
+                fi
+
+                if (( n > 10 )); then
+                    echo "Error: You can only copy up to 10 students from the template. Please enter 1-10." >&2
+                    continue
+                fi
+
+                head -n $(( n + 1 )) templates/assets.csv > "$dir/Helpers/assets.csv" \
+                    || { echo "Error: could not write roster to '$dir/Helpers/assets.csv'." >&2; return 1; }
+
+                echo "Copied $n student(s) from the template into '$dir/Helpers/assets.csv'."
+                break
+                ;;
+            B|b) echo "Selected generate new roster."; break ;;
+            *)   echo "Invalid choice: '$r_choice'. Please choose between A or B." >&2 ;;
+        esac
+    done
+
     echo "Deployment complete: $dir is ready."
 }
 
 verify_dependencies
 start_menu
-
