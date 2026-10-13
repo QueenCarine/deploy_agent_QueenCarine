@@ -37,12 +37,37 @@ start_menu() {
 
         case "$choice" in
             1) project_deployment ;;
-            2) echo "You selected Run." ;;
+            2) run_project ;;
             3) echo "You selected Archive." ;;
             4) echo "Exiting."; exit 0 ;;
             *) echo "Invalid choice: '$choice'. Please enter a number between 1 and 4." >&2 ;;
         esac
     done
+}
+
+# Run Application
+run_project() {
+    read -rp "Enter project name you wantto run: " name
+
+    if [[ -z "$name" ]]; then
+        echo "Error: project name cannot be left empty." >&2
+        return 1
+    fi
+
+    local dir="attendance_tracker_${name}"
+
+    if [[ ! -d "$dir" ]]; then
+        echo "Error: '$dir' does not exist. Make sure it is deployed." >&2
+        return 1
+    fi
+
+    if [[ ! -f "$dir/attendance_checker.py" ]]; then
+        echo "Error: '$dir/attendance_checker.py' not found. Check if the deployment is complete." >&2
+        return 1
+    fi
+
+    echo "Starting attendance_checker.py in '$dir'..."
+    ( cd "$dir" && python3 attendance_checker.py )
 }
 
 # Project Deployment
@@ -92,7 +117,7 @@ project_deployment() {
         read -rp "Choose an option [A/B]: " r_choice
 
         case "$r_choice" in
-                        A|a)
+                A|a)
                 read -rp "How many students to copy? " n
 
                 if [[ ! "$n" =~ ^[0-9]+$ ]] || (( n < 1 )); then
@@ -111,7 +136,7 @@ project_deployment() {
                 echo "Copied $n student(s) from the template into '$dir/Helpers/assets.csv'."
                 break
                 ;;
-                        B|b)
+                B|b)
                 read -rp "How many students do you want to generate? " n
 
                 if [[ ! "$n" =~ ^[0-9]+$ ]] || (( n < 1 )); then
@@ -140,10 +165,10 @@ project_deployment() {
             *)   echo "Invalid choice: '$r_choice'. Please choose between A or B." >&2 ;;
         esac
     done
-    
+
     #Permissions
         chmod +x "$dir/attendance_checker.py" \
-        || { echo "Error:'attendance_checker.py' could not be executable." >&2; return 1; }
+        || { echo "Error:'attendance_checker.py' could not be made executable." >&2; return 1; }
 
     chmod 600 "$dir/Helpers/config.json" \
         || { echo "Error: Not able to restrict permissions on 'config.json'." >&2; return 1; }
@@ -187,7 +212,10 @@ project_deployment() {
     fi
 
     echo "Deployment complete: $dir is ready."
+    echo "Verifying deployment..."
+    run_project "$name"
 }
+
 
 verify_dependencies
 start_menu
