@@ -140,6 +140,8 @@ project_deployment() {
             *)   echo "Invalid choice: '$r_choice'. Please choose between A or B." >&2 ;;
         esac
     done
+    
+    #Permissions
         chmod +x "$dir/attendance_checker.py" \
         || { echo "Error:'attendance_checker.py' could not be executable." >&2; return 1; }
 
