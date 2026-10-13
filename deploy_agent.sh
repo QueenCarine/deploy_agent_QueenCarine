@@ -73,7 +73,8 @@ project_deployment() {
         fi
     fi
 
-    echo "Deploying to: $dir"
+    mkdir -p "$dir/Helpers" "$dir/reports" || { echo "Error: could not create '$dir'. Check permission rights to this folder." >&2; return 1; }
+    echo "Created folders in $dir"
 }
 
 verify_dependencies
