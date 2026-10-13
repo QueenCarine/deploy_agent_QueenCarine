@@ -75,6 +75,10 @@ project_deployment() {
 
     mkdir -p "$dir/Helpers" "$dir/reports" || { echo "Error: could not create '$dir'. Check permission rights to this folder." >&2; return 1; }
     echo "Created folders in $dir"
+    cp templates/attendance_checker.py "$dir/" || { echo "Error: could not copy 'attendance_checker.py' into '$dir/'." >&2; return 1; }
+    cp templates/config.json "$dir/Helpers/" || { echo "Error: could not copy 'config.json' into '$dir/Helpers/'." >&2; return 1; }
+
+    echo "Deployment complete: $dir is ready."
 }
 
 verify_dependencies
