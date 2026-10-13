@@ -23,4 +23,27 @@ verify_dependencies() {
     echo "Checks have passed: $(python3 --version)"
 }
 
+# Start menu
+start_menu() {
+    while true; do
+        echo
+        echo "Start Menu"
+        echo "1) Deploy"
+        echo "2) Run"
+        echo "3) Archive"
+        echo "4) Exit"
+
+        read -rp "Choose one option from 1 to 4: " choice
+
+        case "$choice" in
+            1) echo "You selected Deploy." ;;
+            2) echo "You selected Run." ;;
+            3) echo "You selected Archive." ;;
+            4) echo "Exiting."; exit 0 ;;
+            *) echo "Invalid choice: '$choice'. Please enter a number between 1 and 4." >&2 ;;
+        esac
+    done
+}
+
 verify_dependencies
+start_menu
