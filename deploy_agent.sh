@@ -148,6 +148,42 @@ project_deployment() {
 
     echo "Permissions set: attendance_checker.py (executable), Helpers/config.json (600)."
 
+    #Thresholds
+    read -rp "Update attendance alert thresholds? (y/n): " update
+
+    if [[ "$update" == "y" || "$update" == "Y" ]]; then
+        read -rp "Threshold for warnings (default 75): " warning
+        if [[ -z "$warning" ]]; then
+            warning=75
+        elif [[ ! "$warning" =~ ^[0-9]+$ ]] || (( warning < 1 || warning > 100 )); then
+            echo "Error: warning threshold must be a number between 1 and 100. Will keep default 75." >&2
+            warning=75
+        fi
+
+        read -rp "Threshold for failures (default 50): " failure
+        if [[ -z "$failure" ]]; then
+            failure=50
+        elif [[ ! "$failure" =~ ^[0-9]+$ ]] || (( failure < 1 || failure > 100 )); then
+            echo "Error: failure threshold must be a number between 1 and 100. Will keep default 50." >&2
+            failure=50
+        fi
+
+        if (( warning <= failure )); then
+            echo "Error: warning ($warning) has to be greater than failure ($failure). Will keep defaults (75 / 50)." >&2
+            warning=75
+            failure=50
+        fi
+
+        sed -i "s/\"warning\": [0-9]\+/\"warning\": $warning/" "$dir/Helpers/config.json" \
+            || { echo "Error: could not update warning threshold." >&2; return 1; }
+        sed -i "s/\"failure\": [0-9]\+/\"failure\": $failure/" "$dir/Helpers/config.json" \
+            || { echo "Error: could not update failure threshold." >&2; return 1; }
+
+        echo "Thresholds updated: warning=$warning, failure=$failure."
+    else
+        echo "Keeping default thresholds (warning=75, failure=50)."
+    fi
+
     echo "Deployment complete: $dir is ready."
 }
 
