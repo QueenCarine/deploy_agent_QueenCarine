@@ -53,7 +53,7 @@ run_project() {
     if [[ -z "$name" ]]; then
         read -rp "Enter project name you want to run: " name
     fi
-    
+
     if [[ -z "$name" ]]; then
         echo "Error: project name cannot be left empty." >&2
         return 1
@@ -136,8 +136,8 @@ project_deployment() {
     # Roster
      local names=(
         "Alice Johnson" "Bob Smith" "Charlie Davis" "Diana Prince" "Ethan Cole"
-        "Fatima Noor" "George Mensah" "Hannah Kim" "Ibrahim Osei" "Jasmine Lee"
-    )
+        "Fatima Noor" "George Mensah" "Hannah Kim" "Ibrahim Osei" "Jasmine Lee")
+
     while true; do
         echo
         echo "How would you like to set up your roster?"
@@ -147,7 +147,7 @@ project_deployment() {
         read -rp "Choose an option [A/B]: " r_choice
 
         case "$r_choice" in
-                A|a)
+                    A|a)
                 read -rp "How many students to copy? " n
 
                 if [[ ! "$n" =~ ^[0-9]+$ ]] || (( n < 1 )); then
@@ -166,7 +166,7 @@ project_deployment() {
                 echo "Copied $n student(s) from the template into '$dir/Helpers/assets.csv'."
                 break
                 ;;
-                B|b)
+                    B|b)
                 read -rp "How many students do you want to generate? " n
 
                 if [[ ! "$n" =~ ^[0-9]+$ ]] || (( n < 1 )); then
@@ -196,8 +196,8 @@ project_deployment() {
         esac
     done
 
-    #Permissions
-        chmod +x "$dir/attendance_checker.py" \
+    # Permissions
+    chmod +x "$dir/attendance_checker.py" \
         || { echo "Error:'attendance_checker.py' could not be made executable." >&2; return 1; }
 
     chmod 600 "$dir/Helpers/config.json" \
@@ -205,7 +205,7 @@ project_deployment() {
 
     echo "Permissions set: attendance_checker.py (executable), Helpers/config.json (600)."
 
-    #Thresholds
+    # Thresholds
     read -rp "Update attendance alert thresholds? (y/n): " update
 
     if [[ "$update" == "y" || "$update" == "Y" ]]; then
@@ -251,7 +251,6 @@ project_deployment() {
 # Archive Logs
 logs_archive() {
     local name="${1:-}"
-
     if [[ -z "$name" ]]; then
         read -rp "Enter project name to archive: " name
     fi
@@ -283,7 +282,7 @@ logs_archive() {
         echo "Archived: $dir/archives/attendance/attendance_${ts}.log"
         archived_any=1
     else
-        echo "No attendance.log found in '$reports/' , there is nothing to archive."
+        echo "No attendance log found in '$reports/', so there isn't anything to archive."
     fi
 
     
@@ -293,7 +292,7 @@ logs_archive() {
         echo "Archived: $dir/archives/absent/absent_${ts}.log"
         archived_any=1
     else
-        echo "No absent.log found in '$reports/' , there is nothing to archive."
+        echo "No absent log found in '$reports/' , so there isn't anything to archive."
     fi
 
     if (( archived_any )); then
