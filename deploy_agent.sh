@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+PROJECT_DIR=""
 
 # Verify python3 and zip are installed
 verify_dependencies() {
@@ -47,8 +48,12 @@ start_menu() {
 
 # Run Application
 run_project() {
-    read -rp "Enter project name you wantto run: " name
+    local name="${1:-}"
 
+    if [[ -z "$name" ]]; then
+        read -rp "Enter project name you want to run: " name
+    fi
+    
     if [[ -z "$name" ]]; then
         echo "Error: project name cannot be left empty." >&2
         return 1
@@ -70,6 +75,30 @@ run_project() {
     ( cd "$dir" && python3 attendance_checker.py )
 }
 
+# Signal handlers
+handle_interrupt() {
+    echo
+    echo "Deployment has been interrupted. Cleaning up..." >&2
+
+    if [[ -z "$PROJECT_DIR" || ! -d "$PROJECT_DIR" ]]; then
+        echo "No partial project has been found to archive. Exiting." >&2
+        exit 130
+    fi
+
+    local zip_name="${PROJECT_DIR}_archive.zip"
+
+    if zip -r "$zip_name" "$PROJECT_DIR" >/dev/null 2>&1; then
+        echo "Partial project has been archived: $zip_name" >&2
+    else
+        echo "Warning: could not create '$zip_name'." >&2
+    fi
+
+    rm -rf -- "$PROJECT_DIR"
+    echo "Incomplete directory '$PROJECT_DIR' has been removed." >&2
+
+    exit 130
+}
+
 # Project Deployment
 project_deployment() {
     read -rp "Enter your project name: " name
@@ -85,8 +114,8 @@ project_deployment() {
         return 1
     fi
 
-
-    local dir="attendance_tracker_${name}"
+    PROJECT_DIR="attendance_tracker_${name}"
+    dir="$PROJECT_DIR"
 
     if [[ -d "$dir" ]]; then
         read -rp "Directory '$dir' already exists. Overwrite? (y/n): " confirm
@@ -97,7 +126,8 @@ project_deployment() {
             return 1
         fi
     fi
-
+ 
+    trap handle_interrupt SIGINT SIGTSTP
     mkdir -p "$dir/Helpers" "$dir/reports" || { echo "Error: could not create '$dir'. Check permission rights to this folder." >&2; return 1; }
     echo "Created folders in $dir"
     cp templates/attendance_checker.py "$dir/" || { echo "Error: could not copy 'attendance_checker.py' into '$dir/'." >&2; return 1; }
@@ -211,7 +241,10 @@ project_deployment() {
         echo "Keeping default thresholds (warning=75, failure=50)."
     fi
 
+    trap - SIGINT SIGTSTP
+
     echo "App has successfully deployed: $dir is ready."
+
     echo "Verifying deployment..."
     run_project "$name"
 }
