@@ -38,7 +38,7 @@ start_menu() {
         case "$choice" in
             1) project_deployment ;;
             2) run_project ;;
-            3) echo "You selected Archive." ;;
+            3) logs_archive ;;
             4) echo "Exiting."; exit 0 ;;
             *) echo "Invalid choice: '$choice'. Please enter a number between 1 and 4." >&2 ;;
         esac
@@ -62,7 +62,7 @@ run_project() {
     fi
 
     if [[ ! -f "$dir/attendance_checker.py" ]]; then
-        echo "Error: '$dir/attendance_checker.py' not found. Check if the deployment is complete." >&2
+        echo "Error: '$dir/attendance_checker.py' not found. Check if the app is deployed." >&2
         return 1
     fi
 
@@ -211,9 +211,63 @@ project_deployment() {
         echo "Keeping default thresholds (warning=75, failure=50)."
     fi
 
-    echo "Deployment complete: $dir is ready."
+    echo "App has successfully deployed: $dir is ready."
     echo "Verifying deployment..."
     run_project "$name"
+}
+# Archive Logs
+logs_archive() {
+    local name="${1:-}"
+
+    if [[ -z "$name" ]]; then
+        read -rp "Enter project name to archive: " name
+    fi
+
+    if [[ -z "$name" ]]; then
+        echo "Error: project name cannot be left empty." >&2
+        return 1
+    fi
+
+    local dir="attendance_tracker_${name}"
+
+    if [[ ! -d "$dir" ]]; then
+        echo "Error: '$dir' does not exist. Deploy it first." >&2
+        return 1
+    fi
+
+    local reports="$dir/reports"
+    local ts
+    ts=$(date +%Y%m%d_%H%M%S)
+
+    mkdir -p "$dir/archives/attendance" "$dir/archives/absent" \
+        || { echo "Error: could not create archive directories in '$dir'." >&2; return 1; }
+
+    local archived_any=0
+
+    if [[ -f "$reports/attendance.log" ]]; then
+        mv "$reports/attendance.log" "$dir/archives/attendance/attendance_${ts}.log" \
+            || { echo "Error: could not archive attendance.log." >&2; return 1; }
+        echo "Archived: $dir/archives/attendance/attendance_${ts}.log"
+        archived_any=1
+    else
+        echo "No attendance.log found in '$reports/' , there is nothing to archive."
+    fi
+
+    
+    if [[ -f "$reports/absent.log" ]]; then
+        mv "$reports/absent.log" "$dir/archives/absent/absent_${ts}.log" \
+            || { echo "Error: could not archive absent.log." >&2; return 1; }
+        echo "Archived: $dir/archives/absent/absent_${ts}.log"
+        archived_any=1
+    else
+        echo "No absent.log found in '$reports/' , there is nothing to archive."
+    fi
+
+    if (( archived_any )); then
+        echo "'$dir' has been archived (timestamp: $ts)."
+    else
+        echo "No logs to archive in '$dir'. Make sure to run the app first."
+    fi
 }
 
 
