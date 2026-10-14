@@ -4,7 +4,7 @@ A shell script that bootstraps a Student Attendance Tracker project. It can depl
 
 The Python application (`attendance_checker.py`) is **not modified**. Everything here is shell scripting around the provided files in `templates/`.
 
-**Video walkthrough:** https://screenpal.com/content/video/cO62odnyi3k
+**Video walkthrough:** https://go.screenpal.com/watch/cO62odnyi3k
 
 ---
 
